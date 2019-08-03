@@ -1,0 +1,81 @@
+How to run the program:
+In order to run the program, you must enter a string from several remote servers, and in the second string you must specify the names of the files that need to be transferred to the remote servers.
+Example:
+‘lxplus701’ ‘lxplus741’ ‘lxplus779’
+‘file_1.py’ ‘file_2.py’ ‘file_3.py’
+
+This software uses 3 files: main file is test_mp_pathos.py, and 2 supporting files are script.py and find_ppserv.py.
+
+File test_mp_pathos.py:
+This file contains the class Server and functions Parallel(),send_to_serv(), ppserver().
+
+Class Server:
+Class Server is called from main: Server('lxplus779').The call creates a tunnel that connects localhost with the remote server. During the session, you can get information about the host, the local and remote servers, get the local and remote port numbers and the PID number. This data is in variables self.host, self.local_server, self.remote_server, self.tunnel._lport, self.tunnel._rport, self.pid.
+Example:
+Input: 
+  Server(‘lxplus701’)
+Output:
+  SSH tunnel from:  localhost:23048 -> to: 'lxplus701':23109,
+  pid: 955
+Example:
+Input:
+  Serv = Server(‘lxplus701’)
+  print(serv.local_server)
+Output:
+  localhost:63554
+
+Function Parallel():
+Parallel() function is located in «test_mp_pathos.py». Using the Process() function from the pathos.helper package, the Parallel()function allows you to run multiple processes in parallel for computing. The function «send_to_serv» is written to the variable «target», and the variable «args» is the name of the file containing the calculated code.
+Example: 
+  process = [mp.Process(target = send_to_serv, args = (file,))]
+
+Function send_to_serv():
+The send_to_serv() function is located in the «test_mp_pathos.py» file and is called from the Parallel() function. This function that copies and runs on a remote server the «script.py», starts the ppserver and the executable file on the remote server. After the file is executed, the results are transferred to localhost.
+
+Function ppserver(serv):
+The ppserver() function is located in the «test_mp_pathos.py» file and is called from the send_to_serv() function. At the input of the function given the desired remote server. The function copies the «find_ppserver.py» file to the server and runs it there. On exit we get the path to the ppserver file.
+
+File script.py:
+When you run this file, the environment variables are set and passed to the remote server in the send_to_serv() function.
+
+File find_ppserv.py:
+The file «find_ppserv.py» is needed to find the path to the ppserver on the remote server. The file «find_ppserv.py» contains 3 supporting functions are find(), find_all(), check(). 
+
+Function find(dir):
+The «find(dir)» function on the input gets the path from the file «ppft .__ file__». When you call the function «find(dir)» you can go up through the directories.
+Example:
+Input:
+  file = ppft.__file__
+  dir = os.path.dirname(file)
+  find(dir)
+Output:
+  /cvmfs/lhcb.cern.ch/lib/lcg/releases/LCG_95/ppft/1.6.4.8/x86_64-centos7-gcc8-opt/lib/python2.7/site-packages
+
+Function find_all():
+The «find_all()» function, using os.walk(), looks for the ppserver file in the directory passed to it.
+Example:
+Input:
+  res = str(find_all('ppserver', find_file))
+  print(res)
+Output:
+  ['/cvmfs/lhcb.cern.ch/lib/lcg/releases/LCG_95/ppft/1.6.4.8/x86_64-centos7-gcc8-opt/bin/ppserver']
+
+Function check():
+The «check()» function checks that the path passed to it is the path to the ppserver file.
+Example:
+Input:
+  res = str(find_all('ppserver', find_file))
+  r = res[:-2]
+  print(check(r))
+Output:
+ppserver
+
+Example launch “Sum_primesX.py”:
+To run the "Sum_primesX.py" example, you need to call the Server class from main. 
+The remote server is read first: server = input(), then you need to read the file name: file = input(). For reading several values in the program use 
+map(str, sys.stdin.readline().split())
+Then from main, the Parallel() function is called, in which one line should remain in the process variable, since one file will be calculated.
+Input in the console should look like this:
+Python server.py
+‘lxplus701’
+‘Sum_primesX.py’
