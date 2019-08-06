@@ -94,7 +94,21 @@ def Parallel():
     r3 = map(lambda p: p.join(), process)
     r1 = list(r1); r1 = list(r2); r1 = list(r3)
 
-
+#==================================================================================
+def check_password(servers,passwords,password):
+    try:
+        for i in range(len(servers)):
+            if password == passwords[i]:
+                print("wrong password")
+                exit()
+            else:
+                passwords.append(password)
+                print(passwords)
+                break
+            return passwords
+    except:
+        return 0
+    
 #==================================================================================
 #class Server 
 # make ssh-tunnel between localhost and LHCb-server
@@ -116,6 +130,12 @@ class Server(object):
         self.remote_server = '%s:%d' % (host, self.tunnel._rport)
         self.pid = core.getpid(host)
 
+        password = str(self.tunnel._lport) + str(self.pid) #create secret code
+        servers = [server, server_2, server_3] 
+        passwords = ['']
+        for i in range(len(servers)):
+            passwords = check_password(servers,passwords,password)
+                        
         sys.stdout.flush()
         sys.stdin.flush()
         print('SSH tunnel from:  %s -> to: %s,' % (self.local_server,self.remote_server))
